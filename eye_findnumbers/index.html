@@ -9,52 +9,56 @@
     <link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
     <!-- <script src="https://unpkg.com/vue@next"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <link href="http://fonts.cdnfonts.com/css/roboto-mono" rel="stylesheet">
 </head>
 
-<body>
-    <div id="app" class="d-flex flex-column h-100">
-        <div>
+<body style="font-family: 'Roboto Mono', sans-serif;">
+    <div id="app" class="d-flex flex-column h-100" style="background-color: gray;color: white;">
+        <div class="p-2">
             <a class="btn btn-success" href="/">mainpage</a>
             <button class="btn btn-warning" @click="newgame()">reset game</button>
         </div>
         <div>
             <div class="p-3 d-flex">
-                <span>width</span><input type="range" class="form-range" id="customRange1" v-model="width" min="200"
-                    max="800">
+                <span>width</span><input type="range" class="form-range mx-2" id="customRange1" v-model="width" min="50"
+                    max="100">
                 <span>{{width}}</span>
             </div>
             <div class="p-3 d-flex">
-                <span>height</span><input type="range" class="form-range" id="customRange1" v-model="height" min="200"
-                    max="800">
+                <span>height</span><input type="range" class="form-range mx-2" id="customRange1" v-model="height"
+                    min="200" max="800">
                 <span>{{height}}</span>
             </div>
             <div class="p-3 d-flex">
-                <span>font</span><input type="range" class="form-range" id="customRange1" v-model="fontsize" min="10"
-                    max="50">
+                <span>font</span><input type="range" class="form-range mx-2" id="customRange1" v-model="fontsize"
+                    min="10" max="70">
                 <span>{{fontsize}}</span>
             </div>
             <div class="p-3 d-flex">
-                <span>row</span><input type="range" class="form-range" id="customRange1" v-model="row" min="3" max="10">
+                <span>row</span><input type="range" class="form-range mx-2" id="customRange1" v-model="row" min="3"
+                    max="10">
                 <span>{{row}}</span>
             </div>
             <div class="p-3 d-flex">
-                <span>col</span><input type="range" class="form-range" id="customRange1" v-model="col" min="3" max="10">
+                <span>col</span><input type="range" class="form-range mx-2" id="customRange1" v-model="col" min="3"
+                    max="10">
                 <span>{{col}}</span>
             </div>
 
         </div>
-
+        <div class="p-3">
+            correct:{{correctCount}}<br>
+            wrong:{{wrongCount}}<br>
+            start:{{starttimestamp}}<br>
+            <div class="d-flex"> timer: <span style="margin-left:auto;">{{timer}}</span></div>
+        </div>
         <div class="d-flex justify-content-center">
-            <div style="max-width: 100%; " :style="'width: '+width+'px;height:'+height+'px;'">
-                correct:{{correctCount}}<br>
-                wrong:{{wrongCount}}<br>
-                <div class="h-100 w-100">
-                    <div :class="'h-100 row row-cols-'+col">
-                        <div class="col p-1" v-for="j in numbers" :style="'height: 20%;'">
-                            <button class="btn w-100 h-100" :class="btnstatus(j)" :style="'font-size:'+fontsize+'px;'"
-                                @click="handleClick(j)">
-                                {{j}}
-                            </button>
+            <div style="max-width: 600px; " :style="'width: '+width+'%;height:'+height+'px;'">
+                <div :class="'h-100 w-100 m-0 row row-cols-'+col">
+                    <div class="col p-0" v-for="j in numbers" :style="''">
+                        <div class="btn w-100 h-100 d-flex justify-content-center align-items-center p-0"
+                            :class="btnstatus(j)" :style="'font-size:'+fontsize+'px;'" @click="handleClick(j)">
+                            <span>{{j}}</span>
                         </div>
                     </div>
                 </div>
@@ -62,39 +66,58 @@
                 </div>
             </div>
         </div>
-        <div></div>
+        <div>
+            <div class="d-flex" v-for="h in history">{{h.row}}x{{h.col}}-{{h.date}} <span style="margin-left: auto;">
+                    {{h.time}}</span>
+            </div>
+        </div>
+        <div style="height: 1000px;z-index: -1;"></div>
     </div>
     <script>
         var app = new Vue({
             el: '#app',
             data: {
-                width: 400,
+                width: 100,
                 height: 400,
-                fontsize: 25,
-                row: 5,
-                col: 5,
+                fontsize: localStorage.getItem('setfontsize') || 25,
+                row: localStorage.getItem('setrow') || 5,
+                col: localStorage.getItem('setcol') || 5,
                 correctCount: 0,
                 wrongCount: 0,
                 test: null,
                 numbers: [],
-                game: {
-                    ar: [1, 2]
-                }
+                starttimestamp: 0,
+                timer: '0.000',
+                interval: null,
+
             },
             computed: {
             },
             watch: {
+                fontsize(n, o) {
+                    localStorage.setItem('setfontsize', n)
+                },
                 row(n, o) {
+                    localStorage.setItem('setrow', n)
                     this.newgame()
                 },
                 col(n, o) {
+                    localStorage.setItem('setcol', n)
                     this.newgame()
                 },
             },
             methods: {
                 handleClick(value) {
                     if (this.correctCount + 1 === value) {
+                        if (this.correctCount === 0) {
+                            this.starttimestamp = Date.now() / 1000
+                            this.interval = setInterval(() => {
+                                this.timer = (Date.now() / 1000 - this.starttimestamp).toFixed(3)
+                            }, 43);
+                        }
                         this.correctCount++
+                        if ((this.row * this.col) === this.correctCount)
+                            this.finishIt()
                     }
                     else
                         this.wrongCount++
@@ -103,7 +126,7 @@
                     if (this.correctCount < key)
                         return 'btn-secondary'
                     else
-                        return 'btn-light'
+                        return 'btn-secondary disabled'
                 },
                 btnkey(i, j) {
                     return ((i - 1) * 5) + (j - 1)
@@ -111,16 +134,33 @@
                 newgame(key, value) {
                     this.correctCount = 0
                     this.wrongCount = 0
-                    this.numbers = Array.from(Array(this.row * this.col), (_, i) => i + 1).sort((a, b) => Math.random() - 0.5)
+                    // this.numbers = Array.from(Array(this.row * this.col), (_, i) => i + 1).sort((a, b) => Math.random() - 0.5)
+                    let arr = Array.from(Array(this.row * this.col), (_, i) => i + 1)
+                    for (let i = this.row * this.col; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [arr[i], arr[j]] = [arr[j], arr[i]];
+                    }
+                    this.numbers = arr.filter(a => a)
+                    // .map(p => ({ p, i: Math.random })).sort((a, b) => a.i - b.i).map(p => p.p)
 
                 },
                 getLength(arr) {
                     return JSON.parse(JSON.stringify(arr))
+                },
+                finishIt() {
+                    clearInterval(this.interval)
+
+                    let history = JSON.parse(localStorage.getItem('history')) || []
+                    history.push({ date: Date.now(), time: this.timer, row: this.row, col: this.col, font: this.fontsize })
+                    this.history = history
+                    localStorage.setItem('history', JSON.stringify(history))
+
                 }
             },
             created() {
             },
             async mounted() {
+                this.history = (JSON.parse(localStorage.getItem('history')) || []).slice(-10)
                 this.newgame()
             },
         })
