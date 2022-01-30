@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scar</title>
+    <link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- <script src="https://unpkg.com/vue@next"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+
+<body>
+    <div id="app" class="d-flex flex-column h-100">
+        <div>
+            <a class="btn btn-success" href="/">mainpage</a>
+            <button class="btn btn-warning" @click="newgame()">reset game</button>
+        </div>
+        <div>
+            <div class="p-3 d-flex">
+                <span>width</span><input type="range" class="form-range" id="customRange1" v-model="width" min="200"
+                    max="800">
+                <span>{{width}}</span>
+            </div>
+            <div class="p-3 d-flex">
+                <span>height</span><input type="range" class="form-range" id="customRange1" v-model="height" min="200"
+                    max="800">
+                <span>{{height}}</span>
+            </div>
+            <div class="p-3 d-flex">
+                <span>font</span><input type="range" class="form-range" id="customRange1" v-model="fontsize" min="10"
+                    max="50">
+                <span>{{fontsize}}</span>
+            </div>
+            <div class="p-3 d-flex">
+                <span>row</span><input type="range" class="form-range" id="customRange1" v-model="row" min="3" max="10">
+                <span>{{row}}</span>
+            </div>
+            <div class="p-3 d-flex">
+                <span>col</span><input type="range" class="form-range" id="customRange1" v-model="col" min="3" max="10">
+                <span>{{col}}</span>
+            </div>
+
+        </div>
+
+        <div class="d-flex justify-content-center">
+            <div style="max-width: 100%; " :style="'width: '+width+'px;height:'+height+'px;'">
+                correct:{{correctCount}}<br>
+                wrong:{{wrongCount}}<br>
+                <div class="h-100 w-100">
+                    <div :class="'h-100 row row-cols-'+col">
+                        <div class="col p-1" v-for="j in numbers" :style="'height: 20%;'">
+                            <button class="btn w-100 h-100" :class="btnstatus(j)" :style="'font-size:'+fontsize+'px;'"
+                                @click="handleClick(j)">
+                                {{j}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                </div>
+            </div>
+        </div>
+        <div></div>
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                width: 400,
+                height: 400,
+                fontsize: 25,
+                row: 5,
+                col: 5,
+                correctCount: 0,
+                wrongCount: 0,
+                test: null,
+                numbers: [],
+                game: {
+                    ar: [1, 2]
+                }
+            },
+            computed: {
+            },
+            watch: {
+                row(n, o) {
+                    this.newgame()
+                },
+                col(n, o) {
+                    this.newgame()
+                },
+            },
+            methods: {
+                handleClick(value) {
+                    if (this.correctCount + 1 === value) {
+                        this.correctCount++
+                    }
+                    else
+                        this.wrongCount++
+                },
+                btnstatus(key) {
+                    if (this.correctCount < key)
+                        return 'btn-secondary'
+                    else
+                        return 'btn-light'
+                },
+                btnkey(i, j) {
+                    return ((i - 1) * 5) + (j - 1)
+                },
+                newgame(key, value) {
+                    this.correctCount = 0
+                    this.wrongCount = 0
+                    this.numbers = Array.from(Array(this.row * this.col), (_, i) => i + 1).sort((a, b) => Math.random() - 0.5)
+
+                },
+                getLength(arr) {
+                    return JSON.parse(JSON.stringify(arr))
+                }
+            },
+            created() {
+            },
+            async mounted() {
+                this.newgame()
+            },
+        })
+        window.vapp = app
+    </script>
+</body>
+
+</html>

@@ -12,11 +12,12 @@
 
 <body>
     <div id="app" class="d-flex flex-column h-100">
-        <div> asd - {{test}} - <button class="btn" @click="test=test+1">inc</button></div>
         <div>
-            <div><a class="btn" href="/eye_findnumbers.html"> find numbers </button></div>
+            <div> asd - {{test}} - <button class="btn" @click="test=test+1">inc</button></div>
+            <div>
+                <a class="btn btn-secondary" href="/eye_findnumbers"> find numbers </a>
+            </div>
         </div>
-        <div></div>
     </div>
     <script>
         var app = Vue.createApp({
